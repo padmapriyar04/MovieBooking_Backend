@@ -63,22 +63,32 @@ exports.updateMovie = async (req, res) => {
     }
 }
 
-exports.bookMovie = async(req,res)=>{
-    const {id} = req.params;
-    const {seats} = req.body;
+exports.bookMovie = async (req, res) => {
+    const { id } = req.params;
+    const { seats } = req.body;
 
-    try{
+    try {
         const movie = await Movie.findById(id);
-        if(!movie){
-            return res.status(404).json({message : "Movie is not available, So couldn't book"});
+        if (!movie) {
+            return res.status(404).json({ message: "Movie is not available, So couldn't book" });
         }
-        if(movie.availableSeats < seats){
-            return res.status(400).json({message:"Not enough seats available,So couldn't book"});
+        if (movie.availableSeats < seats) {
+            return res.status(400).json({ message: "Not enough seats available,So couldn't book" });
         }
         movie.availableSeats -= seats;
         await movie.save();
-        return res.json({message:"Booking Successful!"});
-    }catch(error){
-        return res.status(400).json({message : "Error while booking"});
+        return res.json({ message: "Booking Successful!" });
+    } catch (error) {
+        return res.status(400).json({ message: "Error while booking" });
     }
 }
+
+exports.getAllMovies = async (req, res) => {
+    try {
+        const movies = await Movie.find();
+        res.status(200).json(movies);
+    } catch (error) {
+        console.error('Error fetching movies:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
