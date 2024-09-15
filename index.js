@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/mongo');
 const movieRoutes = require('./Routes/movieRoutes');
 const authRoutes = require('./Routes/authRoutes');
+const cors = require('cors');
 
 const app = express();
 
@@ -13,6 +14,7 @@ dotenv.config();
 connectDB();
 
 app.use(express.json());
+app.use(cors());
 
 app.use('/api/auth',authRoutes);
 app.use('/api/movies',movieRoutes);
