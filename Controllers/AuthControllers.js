@@ -1,9 +1,10 @@
 const User = require('../models/User');
-const {getSignedToken,matchPassword} = require('../models/User');
+const {getSignedToken,matchPassword,getRefreshToken} = require('../models/User');
 
 const sendTokenResponse = (user,StatusCode,response)=>{
-    const token  = user.getSignedToken();
-    response.status(StatusCode).json({success:true,token});
+    const accesstoken  = user.getSignedToken();
+    const refreshToken = user.getRefreshToken();
+    response.status(StatusCode).json({success:true,accesstoken,refreshToken,id: user._id,role:user.role});
 }
 
 exports.register = async(req,res)=>{
@@ -45,3 +46,25 @@ exports.login = async(req,res)=>{
         console.error(error);
     }
 }
+
+exports.refreshAccessToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token not provided' });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const user = await User.findById(decoded.id);
+        
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid refresh token' });
+        }
+
+        const accessToken = user.getSignedToken();
+        res.status(200).json({ success: true, accessToken });
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+};
