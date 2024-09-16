@@ -92,3 +92,18 @@ exports.getAllMovies = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+exports.getMoviesByProvider = async (req, res) => {
+    try {
+        const { providerId } = req.params;
+        const movies = await Movie.find({ provider: providerId });
+
+        if (movies.length === 0) {
+            return res.status(404).json({ message: "No movies found for this provider" });
+        }
+
+        res.status(200).json(movies);
+    } catch (error) {
+        res.status(500).json({ message: "Server error, couldn't fetch movies" });
+    }
+};
